@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Poetry Maker</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            background: #0a0a0a; 
+            color: #00ff00; 
+            font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+            padding: 20px; 
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+        }
+        
+        header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            padding: 20px; 
+        }
+        
+        h1 { 
+            font-size: 2.5rem; 
+            color: #00ff00; 
+            margin-bottom: 10px; 
+            text-shadow: 0 0 10px #00ff00;
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle { 
+            color: #00cc00; 
+            font-size: 1rem;
+            border: 1px solid #00cc00;
+            padding: 10px 20px;
+            display: inline-block;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .maker-quote {
+            color: #00cc00;
+            font-style: italic;
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 3px solid #00cc00;
+            background: rgba(0, 255, 0, 0.05);
+            font-size: 0.95rem;
+        }
+        
+        #poema-container {
+            background: #111111; 
+            border: 1px solid #00cc00; 
+            padding: 30px; 
+            margin: 20px 0; 
+            min-height: 450px; 
+            font-size: 14px;
+            line-height: 1.7; 
+            white-space: pre; 
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+            border-radius: 2px;
+        }
+        
+        .interactive-area {
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            cursor: crosshair;
+            z-index: 10;
+        }
+        
+        .touch-effect {
+            position: absolute; 
+            width: 20px; 
+            height: 20px;
+            border-radius: 50%; 
+            background: rgba(0, 255, 0, 0.3);
+            pointer-events: none; 
+            animation: ripple 1s linear;
+            z-index: 5;
+        }
+        
+        @keyframes ripple {
+            0% { 
+                transform: scale(0.5); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(3); 
+                opacity: 0; 
+            }
+        }
+        
+        .controls {
+            display: flex; 
+            gap: 15px; 
+            justify-content: center;
+            flex-wrap: wrap; 
+            margin: 30px 0;
+        }
+        
+        button {
+            background: #003300; 
+            color: #00ff00; 
+            border: 1px solid #00cc00;
+            padding: 12px 25px; 
+            font-family: 'Courier New', monospace;
+            font-size: 14px; 
+            cursor: pointer; 
+            min-width: 160px;
+            transition: all 0.3s;
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        
+        button:hover { 
+            background: #00cc00; 
+            color: #000;
+            box-shadow: 0 0 15px #00ff00;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .audio-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .audio-control label {
+            color: #00cc00;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        
+        .audio-toggle {
+            width: 50px;
+            height: 25px;
+            background: #003300;
+            border: 1px solid #00cc00;
+            border-radius: 25px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .audio-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 19px;
+            height: 19px;
+            background: #00cc00;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        #audio-toggle:checked + .audio-toggle::after {
+            transform: translateX(25px);
+        }
+        
+        #audio-toggle {
+            display: none;
+        }
+        
+        .info { 
+            text-align: center; 
+            color: #008800; 
+            margin-top: 40px;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #003300;
+        }
+        
+        .github-link {
+            color: #00cc00;
+            text-decoration: none;
+            border-bottom: 1px dotted #00cc00;
+            margin-left: 10px;
+        }
+        
+        .github-link:hover {
+            color: #00ff00;
+            border-bottom: 1px solid #00ff00;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { 
+                font-size: 2rem; 
+            }
+            
+            #poema-container { 
+                padding: 20px; 
+                font-size: 12px;
+                min-height: 400px;
+            }
+            
+            button { 
+                padding: 10px 20px; 
+                min-width: 140px;
+                font-size: 13px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .maker-quote {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
+            
+            #poema-container {
+                padding: 15px;
+                min-height: 350px;
+            }
+            
+            button {
+                min-width: 120px;
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
+
+        /* Scrollbar personalizado */
+        #poema-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #poema-container::-webkit-scrollbar-track {
+            background: #003300;
+        }
+        
+        #poema-container::-webkit-scrollbar-thumb {
+            background: #00cc00;
+            border-radius: 4px;
+        }
+        
+        #poema-container::-webkit-scrollbar-thumb:hover {
+            background: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CODE POETRY MAKER</h1>
+            <div class="subtitle">// donde los bits encuentran poesía //</div>
+            <div class="maker-quote">
+                "No preguntes qué puede hacer el código por ti, pregunta qué puedes crear con el código"
+            </div>
+        </header>
+        
+        <div id="poema-container">
+            <div class="interactive-area" id="interactive-area"></div>
+            <div id="poema">Compilando poema...</div>
+        </div>
+
+        <div class="audio-control">
+            <label for="audio-toggle">Sonidos Maker:</label>
+            <input type="checkbox" id="audio-toggle">
+            <label for="audio-toggle" class="audio-toggle"></label>
+        </div>
+
+        <div class="controls">
+            <button id="btn-compilar">COMPILAR POEMA</button>
+            <button id="btn-debug">DEBUG GEOMÉTRICO</button>
+            <button id="btn-guardar">GUARDAR CÓDIGO</button>
+        </div>
+
+        <div class="info">
+            ✦ Cada poema es un algoritmo único ✦ Interactúa para modificar el código ✦
+            <br>
+            <a href="https://github.com/tu-usuario/code-poetry-maker" class="github-link" target="_blank">
+                Ver en GitHub
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // VOCABULARIO MAKER Y CODE POETRY
+        const conceptosMaker = [
+            "prototipo", "circuito", "sensor", "actuador", "microcontrolador", 
+            "impresión 3D", "PCB", "protoboard", "osciloscopio", "multímetro",
+            "soldadura", "programación", "debugging", "iteración", "open source",
+            "DIY", "hardware", "firmware", "IoT", "robótica", "domótica",
+            "wearables", "drones", "makerspace", "fablab", "hackerspace",
+            "electrónica", "programable", "modular", "custom", "hackear",
+            "construir", "desarmar", "reparar", "mejorar", "compartir",
+            "algoritmo", "binario", "hexadecimal", "compilador", "interprete",
+            "kernel", "script", "framework", "librería", "API", "SDK",
+            "debugger", "profiler", "optimizador", "emulador", "simulador",
+            "parámetro", "variable", "función", "método", "clase", "objeto",
+            "instancia", "herencia", "polimorfismo", "encapsulamiento", "abstracción"
+        ];
+
+        const verbosTecnologicos = [
+            "compila", "ejecuta", "debuggea", "itera", "programa",
+            "solda", "conecta", "configura", "flashea", "parpadea",
+            "sensorea", "actúa", "procesa", "transmite", "recibe",
+            "codifica", "decodifica", "encripta", "desencripta", "comprime",
+            "renderiza", "calcula", "optimiza", "versiona", "testea",
+            "deploya", "monitorea", "escala", "converge", "diverge",
+            "analiza", "sintetiza", "transforma", "convierte", "traduce",
+            "interpreta", "ejecuta", "procesa", "calcula", "evalúa",
+            "valida", "verifica", "certifica", "autentica", "autoriza",
+            "serializa", "deserializa", "persiste", "cachea", "indexa"
+        ];
+
+        const estructurasCodigo = [
+            "function {verbo}() {\n  return {concepto} + {concepto};\n}",
+            "while ({concepto}) {\n  {verbo}.{concepto}();\n}",
+            "if ({concepto} && {concepto}) {\n  {verbo}.infinite();\n}",
+            "class {concepto} extends {concepto} {\n  constructor() {\n    this.{verbo} = true;\n  }\n}",
+            "const {concepto} = new {concepto}();\n{concepto}.{verbo}();",
+            "for (let i = 0; i < {concepto}; i++) {\n  {verbo}.the({concepto});\n}",
+            "switch ({concepto}) {\n  case '{concepto}':\n    {verbo}.now();\n    break;\n}",
+            "try {\n  {verbo}.{concepto}();\n} catch ({concepto}) {\n  // falló hermosamente\n}",
+            "async function {verbo}() {\n  await {concepto}.promise();\n}",
+            "const {concepto} = [{concepto}, {concepto}].map(x => x.{verbo}());",
+            "#define {concepto} {concepto}\nvoid {verbo}() {{\n  digitalWrite({concepto}, HIGH);\n}}",
+            "import {concepto} from '{concepto}';\nexport default {verbo};",
+            "struct {concepto} {\n  int {verbo};\n  char {concepto}[256];\n};",
+            "// {concepto}.{verbo}\n// {concepto} > {concepto}",
+            "while (!{concepto}.done()) {{\n  {verbo}.next({concepto});\n}}"
+        ];
+
+        const simbolosMaker = [
+            "⚡", "🔧", "🛠️", "🔩", "⚙️", "💡", "🔌", "📡", "💻", "🖥️",
+            "⌨️", "🖱️", "📱", "🔋", "💾", "🖨️", "🎮", "🔬", "📊", "📈",
+            "🔍", "🎯", "⚗️", "🧪", "🔭", "📡", "🛰️", "🚀", "🧩", "🎲",
+            "⎔", "⎚", "⏣", "⍝", "⍟", "⍎", "⍕", "⌬", "⏚", "⏛",
+            "⍂", "⍢", "⍭", "⍮", "⍯", "⍰", "⍱", "⍲", "⍳", "⍴",
+            "⍵", "⍶", "⍷", "⍸", "⍹", "⍺", "⎕", "○", "◙", "◎",
+            "●", "◌", "◍", "◎", "○", "◐", "◑", "◒", "◓", "◔",
+            "◕", "◖", "◗", "❒", "◰", "◱", "◲", "◳", "◴", "◵",
+            "◶", "◷", "◸", "◹", "◺", "◻", "◼", "▢", "▣", "▤",
+            "▥", "▦", "▧", "▨", "▩", "▪", "▫", "▬", "▭", "▮",
+            "▯", "▰", "▱", "▲", "△", "▴", "▵", "▶", "▷", "▸",
+            "▹", "►", "▻", "▼", "▽", "▾", "▿", "◀", "◁", "◂",
+            "◃", "◄", "◅", "◆", "◇", "◈", "◉", "◊", "○", "◌",
+            "◍", "◎", "●", "◐", "◑", "◒", "◓", "◔", "◕", "◖",
+            "◗", "◘", "◙", "◚", "◛", "◜", "◝", "◞", "◟", "◠",
+            "◡", "◢", "◣", "◤", "◥", "◦", "◧", "◨", "◩", "◪",
+            "◫", "◬", "◭", "◮", "◯", "◰", "◱", "◲", "◳", "◴",
+            "◵", "◶", "◷", "◸", "◹", "◺", "◻", "◼", "◽", "◾",
+            "◿", "☀", "☁", "☂", "☃", "☄", "★", "☆", "☇", "☈",
+            "☉", "☊", "☋", "☌", "☍", "☎", "☏", "☐", "☑", "☒",
+            "☓", "☔", "☕", "☖", "☗", "☘", "☙", "☚", "☛", "☜",
+            "☝", "☞", "☟", "☠", "☡", "☢", "☣", "☤", "☥", "☦",
+            "☧", "☨", "☩", "☪", "☫", "☬", "☭", "☮", "☯", "☸",
+            "☹", "☺", "☻", "☼", "☽", "☾", "☿", "♀", "♁", "♂",
+            "♃", "♄", "♅", "♆", "♇", "♈", "♉", "♊", "♋", "♌",
+            "♍", "♎", "♏", "♐", "♑", "♒", "♓", "♔", "♕", "♖",
+            "♗", "♘", "♙", "♚", "♛", "♜", "♝", "♞", "♟", "♠",
+            "♣", "♦", "♥", "♤", "♧", "♢", "♡", "♨", "♩", "♪",
+            "♫", "♬", "♭", "♮", "♯"
+        ];
+
+        const frasesInspiradoras = [
+            "// El código es poesía para máquinas\n",
+            "// Cada bug es una oportunidad de aprender\n",
+            "// Prototipar es pensar con las manos\n",
+            "// La mejor documentación es el código mismo\n",
+            "// No hay atajos hacia lugares que valgan la pena\n",
+            "// Hardware sin software es escultura\n",
+            "// Software sin hardware es fantasía\n",
+            "// El maker transforma ideas en realidad\n",
+            "// Compartir conocimiento multiplica la innovación\n",
+            "// El fracaso es solo el primer prototipo\n",
+            "// Las manos que crean transforman el mundo\n",
+            "// Cada línea de código es un paso hacia lo nuevo\n",
+            "// La curiosidad es el motor del maker\n",
+            "// Lo imposible es solo algo que no se ha intentado\n",
+            "// La belleza está en lo funcional\n"
+        ];
+
+        // Estado de la aplicación
+        let audioActivo = false;
+        let audioContext = null;
+
+        // Elementos DOM
+        const poemaElement = document.getElementById('poema');
+        const interactiveArea = document.getElementById('interactive-area');
+        const audioToggle = document.getElementById('audio-toggle');
+
+        // FUNCIONES PRINCIPALES
+        function obtenerAleatorio(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function generarEstructuraCodigo() {
+            let estructura = obtenerAleatorio(estructurasCodigo);
+            
+            estructura = estructura.replace(/{concepto}/g, () => obtenerAleatorio(conceptosMaker));
+            estructura = estructura.replace(/{verbo}/g, () => obtenerAleatorio(verbosTecnologicos));
+            
+            return estructura;
+        }
+
+        function generarLineaCodigo() {
+            if (Math.random() < 0.6) {
+                return generarEstructuraCodigo();
+            } else {
+                return "// " + obtenerAleatorio(conceptosMaker) + " " + 
+                       obtenerAleatorio(verbosTecnologicos) + " " + 
+                       obtenerAleatorio(conceptosMaker);
+            }
+        }
+
+        function generarLineaASCIIMaker() {
+            let linea = "";
+            const patrones = ["▁▂▃▄▅▆▇█", "▀▄█▌▐▖▗▘▙▚▛▜▝▞▟", "◢◣◤◥", "▰▱▲△▶▷▼▽◀◁"];
+            const patron = obtenerAleatorio(patrones);
+            
+            for (let i = 0; i < 20 + Math.floor(Math.random() * 20); i++) {
+                if (Math.random() < 0.7) {
+                    linea += patron[Math.floor(Math.random() * patron.length)];
+                } else {
+                    linea += obtenerAleatorio(simbolosMaker);
+                }
+            }
+            return linea;
+        }
+
+        function generarLineaMixtaMaker() {
+            if (Math.random() < 0.5) {
+                return obtenerAleatorio(conceptosMaker) + " " + 
+                       obtenerAleatorio(verbosTecnologicos) + " → " + 
+                       obtenerAleatorio(simbolosMaker) + " " + 
+                       obtenerAleatorio(conceptosMaker);
+            } else {
+                let linea = "";
+                for (let i = 0; i < 3; i++) {
+                    linea += obtenerAleatorio(simbolosMaker) + " ";
+                }
+                linea += obtenerAleatorio(verbosTecnologicos) + " ";
+                for (let i = 0; i < 2; i++) {
+                    linea += obtenerAleatorio(simbolosMaker) + " ";
+                }
+                return linea;
+            }
+        }
+
+        function compilarPoema() {
+            let poema = "";
+            
+            // Cabecera inspiradora
+            poema += obtenerAleatorio(frasesInspiradoras) + "\n";
+            poema += "/* ========== CODEPOEM v1.0 ========== */\n\n";
+            
+            // Sección de código
+            for (let i = 0; i < 4; i++) {
+                poema += generarLineaCodigo() + "\n\n";
+            }
+            
+            // Separador visual
+            poema += "/* " + "=".repeat(40) + " */\n\n";
+            
+            // Sección mixta
+            for (let i = 0; i < 8; i++) {
+                const tipo = Math.random();
+                if (tipo < 0.4) {
+                    poema += generarLineaCodigo() + "\n";
+                } else if (tipo < 0.7) {
+                    poema += generarLineaASCIIMaker() + "\n";
+                } else {
+                    poema += generarLineaMixtaMaker() + "\n";
+                }
+            }
+            
+            // Footer
+            poema += "\n/* " + "=".repeat(40) + " */\n";
+            poema += "// " + obtenerAleatorio(frasesInspiradoras).replace("// ", "") + "\n";
+            poema += "// Compilado en: " + new Date().toLocaleTimeString() + "\n";
+            
+            poemaElement.textContent = poema;
+        }
+
+        function debugPoema() {
+            const texto = poemaElement.textContent;
+            const lineas = texto.split('\n');
+            const nuevasLineas = [];
+            
+            lineas.forEach(linea => {
+                if (linea.trim() && Math.random() < 0.3) {
+                    // Insertar símbolos de debug
+                    const debugSymbols = ["◍", "○", "◐", "◑", "◒", "◓"];
+                    const pos = Math.floor(Math.random() * linea.length);
+                    const simbolo = obtenerAleatorio(debugSymbols);
+                    nuevasLineas.push(linea.substring(0, pos) + simbolo + linea.substring(pos));
+                } else {
+                    nuevasLineas.push(linea);
+                }
+            });
+            
+            poemaElement.textContent = nuevasLineas.join('\n');
+        }
+
+        function crearEfectoToque(x, y) {
+            const efecto = document.createElement('div');
+            efecto.className = 'touch-effect';
+            efecto.style.left = (x - 10) + 'px';
+            efecto.style.top = (y - 10) + 'px';
+            interactiveArea.appendChild(efecto);
+            setTimeout(() => efecto.remove(), 1000);
+        }
+
+        function modificarCodigo(x, y) {
+            const texto = poemaElement.textContent;
+            const lineas = texto.split('\n');
+            if (lineas.length === 0) return;
+            
+            const area = interactiveArea;
+            const lineaIndex = Math.min(Math.floor((y / area.offsetHeight) * lineas.length), lineas.length - 1);
+            const charIndex = Math.min(Math.floor((x / area.offsetWidth) * lineas[lineaIndex].length), lineas[lineaIndex].length - 1);
+            
+            const nuevoChar = obtenerAleatorio(simbolosMaker);
+            lineas[lineaIndex] = lineas[lineaIndex].substring(0, charIndex) + nuevoChar + lineas[lineaIndex].substring(charIndex + 1);
+            poemaElement.textContent = lineas.join('\n');
+        }
+
+        function toggleAudio() {
+            audioActivo = !audioActivo;
+            
+            if (audioActivo && !audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function generarSonidoMaker(frecuencia) {
+            if (!audioActivo || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Sonidos más tecnológicos
+            oscillator.type = Math.random() < 0.5 ? 'square' : 'sawtooth';
+            oscillator.frequency.value = 100 + (frecuencia % 1000);
+            gainNode.gain.value = 0.08;
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function guardarCodigo() {
+            const texto = poemaElement.textContent;
+            const blob = new Blob([texto], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'codepoem_' + Date.now() + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // CONFIGURACIÓN DE EVENTOS
+        function configurarEventos() {
+            // Botones principales
+            document.getElementById('btn-compilar').addEventListener('click', compilarPoema);
+            document.getElementById('btn-debug').addEventListener('click', debugPoema);
+            document.getElementById('btn-guardar').addEventListener('click', guardarCodigo);
+            
+            // Toggle de audio
+            audioToggle.addEventListener('change', toggleAudio);
+            
+            // Interactividad del área del poema
+            interactiveArea.addEventListener('click', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                crearEfectoToque(x, y);
+                modificarCodigo(x, y);
+                
+                if (audioActivo) {
+                    generarSonidoMaker(x * y);
+                }
+            });
+
+            // Soporte táctil para móviles
+            interactiveArea.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = this.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                
+                const event = new MouseEvent('click', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                this.dispatchEvent(event);
+            });
+        }
+
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', function() {
+            configurarEventos();
+            compilarPoema();
+            
+            console.log('🚀 Code Poetry Maker inicializado');
+            console.log('✨ Donde los bits encuentran poesía');
+        });
+    </script>
+</body>
+</html>
